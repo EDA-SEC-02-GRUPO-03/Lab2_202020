@@ -36,7 +36,7 @@ from DataStructures import liststructure as lt
 from time import process_time 
 
 
-def loadCSVFile (file, sep=";"):
+def loadCSVFile (file1,file2, sep=";"):
     """
     Carga un archivo csv a una lista
     Args:
@@ -56,7 +56,11 @@ def loadCSVFile (file, sep=";"):
     dialect = csv.excel()
     dialect.delimiter=sep
     try:
-        with open(file, encoding="utf-8") as csvfile:
+        with open(file1, encoding="utf-8") as csvfile:
+            spamreader = csv.DictReader(csvfile, dialect=dialect)
+            for row in spamreader: 
+                lt.addLast(lst,row)
+        with open(file2, encoding="utf-8") as csvfile:
             spamreader = csv.DictReader(csvfile, dialect=dialect)
             for row in spamreader: 
                 lt.addLast(lst,row)
@@ -66,6 +70,29 @@ def loadCSVFile (file, sep=";"):
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return lst
 
+    del lst[:]
+    print("Cargando archivo ....")
+    t1_start = process_time() #tiempo inicial
+
+    abierto1 = open(archivo1, 'r', encoding = 'utf8')
+    abierto2 = open(archivo2, 'r', encoding = 'utf8')
+    categorias = abierto1.readline().split(';')
+    categorias.extend(abierto2.readline().split(';'))
+    linea = abierto1.readline() + ';' + abierto2.readline()
+
+    while len(linea)>0: 
+        datos = linea.split(';')
+        dicc = {}
+        for i in range (len(categorias)-len(datos)):
+            datos.append(None)
+        for i in range(len(categorias)):
+            dicc[categorias[i]] = datos[i]
+        lst.append(dicc)
+        linea = abierto1.readline() + abierto2.readline()
+        
+        
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
 
 def printMenu():
     """
@@ -86,7 +113,7 @@ def countElementsFilteredByColumn(criteria, column, lst):
             Critero sobre el cual se va a contar la cantidad de apariciones
         column
             Columna del arreglo sobre la cual se debe realizar el conteo
-        list
+        lst
             Lista en la cual se realizará el conteo, debe estar inicializada
     Return:
         counter :: int
@@ -133,7 +160,7 @@ def main():
         inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
-                lista = loadCSVFile("Data/test.csv") #llamar funcion cargar datos
+                lista = loadCSVFile("Data\SmallMoviesDetailsCleaned.csv","Data\MoviesCastingRaw-small.csv") #llamar funcion cargar datos
                 print("Datos cargados, ",lista['size']," elementos cargados")
             elif int(inputs[0])==2: #opcion 2
                 if lista==None or lista['size']==0: #obtener la longitud de la lista
@@ -144,7 +171,8 @@ def main():
                     print("La lista esta vacía")
                 else:   
                     criteria =input('Ingrese el criterio de búsqueda\n')
-                    counter=countElementsFilteredByColumn(criteria, "nombre", lista) #filtrar una columna por criterio  
+                    column = input('Ingrese columna de búsqueda\n')
+                    counter=countElementsFilteredByColumn(criteria, column, lista) #filtrar una columna por criterio  
                     print("Coinciden ",counter," elementos con el crtierio: ", criteria  )
             elif int(inputs[0])==4: #opcion 4
                 if lista==None or lista['size']==0: #obtener la longitud de la lista
