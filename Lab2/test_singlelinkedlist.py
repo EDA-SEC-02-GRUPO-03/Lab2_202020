@@ -19,8 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
-import pytest 
-import config 
+import pytest
+import config
 from DataStructures import singlelinkedlist as slt
 
 
@@ -29,13 +29,13 @@ def cmpfunction (element1, element2):
     if element1 == element2:
         return 0
 
-@pytest.fixture
+pytest.fixture
 def lst ():
     lst = slt.newList(cmpfunction)
     return lst
 
 
-@pytest.fixture
+pytest.fixture
 def books ():
     books = []
     books.append({'book_id':'1', 'book_title':'Title 1', 'author':'author 1'})
@@ -47,7 +47,7 @@ def books ():
     return books
 
 
-@pytest.fixture
+pytest.fixture
 def lstbooks(books):
     lst = slt.newList(cmpfunction)
     for i in range(0,5):    
