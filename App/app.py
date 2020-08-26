@@ -32,7 +32,9 @@ import csv
 from ADT import list as lt
 from DataStructures import listiterator as it
 from DataStructures import liststructure as lt
-
+from Sorting import selectionsort as sel 
+from Sorting import insertionsort as ins 
+from Sorting import shellsort as sh
 from time import process_time 
 
 
@@ -83,7 +85,10 @@ def printMenu():
     print("2- Contar los elementos de la Lista")
     print("3- Contar elementos filtrados por palabra clave")
     print("4- Consultar elementos a partir de dos listas")
+    print('5- Req. 1: Buenas películas de un director')
+    print('6- Req. 2: Ranking de Películas')
     print("0- Salir")
+
 
 def countElementsFilteredByColumn(criteria, column, lst):
     """
@@ -114,11 +119,57 @@ def countElementsFilteredByColumn(criteria, column, lst):
         print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return counter
 
-def countElementsByCriteria(criteria, column, lst):
-    """
-    Retorna la cantidad de elementos que cumplen con un criterio para una columna dada
-    """
-    return 0
+def req1(lst1, lst2, criteria1, column1, criteria2, column2):
+
+    if lst1['size'] == 0 or lst2['size'] == 0:
+        print ('Lista vacía')
+    else:
+        t1_start = process_time()
+        counter = 0
+        iterator1 = it.newIterator(lst1)
+        i = 0
+        positions = []
+        while  it.hasNext(iterator1):
+            element = it.next(iterator1)
+            if criteria1.lower() in element[column1].lower(): #filtrar por palabra clave 
+                positions.append(i)
+            i+=1
+        for i in positions:
+            element = lt.getElement(lst2 ,i)
+            if float(element[column2]) >= float(criteria2):
+                counter += 1            
+    t1_stop = process_time()
+    print('EL tiempo es de ', t1_stop-t1_start, ' segundos')
+    return counter
+
+def lessfunction(element1, element2, criteria):
+    if int(element1[criteria]) < int(element2[criteria]):
+        return True
+    return False
+
+def greaterfunction(element1, element2, criteria):
+    if int(element1[criteria]) > int(element2[criteria]):
+        return True
+    return False
+
+def req2 (lst, criteria, n, goodbad):
+    t1_start = process_time()
+    if goodbad == 1:
+        orden = sh.shellSort(lst, greaterfunction, criteria)
+        #orden = sel.selectionSort(lst, greaterfunction, criteria)
+        #orden = ins.insertionSort(lst, greaterfunction, criteria)
+    elif goodbad == 0:
+        orden = sh.shellSort(lst, lessfunction, criteria)
+        #orden = sel.selectionSort(lst, lessfunction, criteria)
+        #orden = ins.insertionSort(lst, lessfunction, criteria)
+    result = []
+    
+    for i in range(n):
+        result.append(orden[i])
+    t1_stop = process_time()
+    print('El tiempo fue de ', t1_stop-t1_start, ' segundos')
+    return result
+
 
 def orderElementsByCriteria(function, column, lst, elements):
     """
@@ -134,39 +185,39 @@ def main():
     Args: None
     Return: None 
     """
-    lista1 = lt.newList()   # se require usar lista definida
-    lista2 = lt.newList() 
+    listaD = lt.newList()   # se require usar lista definida
+    listaC = lt.newList() 
     while True:
         printMenu() #imprimir el menu de opciones en consola
         inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
                 datos = loadCSVFile("Data\AllMoviesDetailsCleaned.csv","Data\AllMoviesCastingRaw.csv") #llamar funcion cargar datos
-                lista1 = datos[0]
-                lista2 = datos[1]
-                print("Datos de detalles cargados, ",lista1['size']," elementos cargados")
-                print("Datos de casting cargados, ",lista2['size']," elementos cargados")
+                listaD = datos[0]
+                listaC = datos[1]
+                print("Datos de detalles cargados, ",listaD['size']," elementos cargados")
+                print("Datos de casting cargados, ",listaC['size']," elementos cargados")
             elif int(inputs[0])==2: #opcion 2
-                if lista1==None or lista1['size']==0: #obtener la longitud de la lista
+                if listaD==None or listaD['size']==0: #obtener la longitud de la lista
                     print("La lista 1 está vacía")
-                elif lista2==None or lista2['size']==0: 
+                elif listaC==None or listaC['size']==0: 
                     print('La lista 2 está vacía')
                 else: 
-                    print("La lista de detalles tiene ",lista1['size']," elementos")
-                    print("La lista de casting tiene ",lista2['size']," elementos")
+                    print("La lista de detalles tiene ",listaD['size']," elementos")
+                    print("La lista de casting tiene ",listaC['size']," elementos")
             elif int(inputs[0])==3: #opcion 3
-                if lista1==None or lista1['size']==0: #obtener la longitud de la lista
-                    print("La lista 1 esta vacía")
-                elif lista2==None or lista2['size']==0:
-                    print("La lista 2 esta vacía")
+                if listaD==None or listaD['size']==0: #obtener la longitud de la lista
+                    print("La lista de detalles esta vacía")
+                elif listaC==None or listaC['size']==0:
+                    print("La lista de casting esta vacía")
                 else:
                     archivo = input('Ingrese el archivo de búsqueda (Detalles o Casting)\n')   
                     column = input('Ingrese columna de búsqueda\n')
                     criteria =input('Ingrese el criterio de búsqueda\n')
                     if archivo.lower() == 'detalles':
-                        counter=countElementsFilteredByColumn(criteria, column, lista1) #filtrar una columna por criterio  
+                        counter=countElementsFilteredByColumn(criteria, column, listaD) #filtrar una columna por criterio  
                     elif archivo.lower() == 'casting':
-                        counter=countElementsFilteredByColumn(criteria, column, lista2)
+                        counter=countElementsFilteredByColumn(criteria, column, listaC)
                     print("Coinciden ",counter," elementos con el criterio: ", criteria  )
             elif int(inputs[0])==4: #opcion 4
                 if lista==None or lista['size']==0: #obtener la longitud de la lista
@@ -174,7 +225,20 @@ def main():
                 else:
                     criteria =input('Ingrese el criterio de búsqueda\n')
                     counter=countElementsByCriteria(criteria,0,lista)
-                    print("Coinciden ",counter," elementos con el crtierio: '", criteria ,"' (en construcción ...)")
+                    print("Coinciden ",counter," elementos con el criterio: '", criteria ,"' (en construcción ...)")
+            elif int(inputs[0])==5: #opcion 5
+                director = input('Ingrese el nombre del director:\n')
+                pelis = req1(listaC,listaD, director, 'director_name', 6, 'vote_average')
+                print('El director ', director, ' tiene ', pelis, ' películas buenas.')
+            elif int(inputs[0])==6: #opcion 5
+                gb1 = int(input('Más Votos (1) o Menos Votos (0):\n'))
+                n1 = int(input('¿Cuántas películas?\n'))
+                gb2 = int(input('Mejor Promedio (1) o Peor Promedio (0):\n'))
+                n2 = int(input('¿Cuántas películas?\n'))
+                resultados1 = req2(listaD,'vote_count', n1, gb1)
+                resultados2 = req2(listaD, 'vote_average', n2, gb2)
+                print('Por votos:\n',resultados1 )
+                print('Por promedio:\n', resultados2)
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
                 
