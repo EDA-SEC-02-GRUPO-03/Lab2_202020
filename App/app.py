@@ -49,9 +49,11 @@ def loadCSVFile (file1,file2, sep=";"):
         Borra la lista e informa al usuario
     Returns: None  
     """
-    #lst = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
-    lst = lt.newList() #Usando implementacion linkedlist
-    print("Cargando archivo ....")
+    #lst1 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
+    lst1 = lt.newList() #Usando implementacion linkedlist
+    #lst2 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
+    lst2 = lt.newList() #Usando implementacion linkedlist
+    print("Cargando archivos ....")
     t1_start = process_time() #tiempo inicial
     dialect = csv.excel()
     dialect.delimiter=sep
@@ -59,40 +61,18 @@ def loadCSVFile (file1,file2, sep=";"):
         with open(file1, encoding="utf-8") as csvfile:
             spamreader = csv.DictReader(csvfile, dialect=dialect)
             for row in spamreader: 
-                lt.addLast(lst,row)
+                lt.addLast(lst1,row)
         with open(file2, encoding="utf-8") as csvfile:
             spamreader = csv.DictReader(csvfile, dialect=dialect)
             for row in spamreader: 
-                lt.addLast(lst,row)
+                lt.addLast(lst2,row)
+
     except:
-        print("Hubo un error con la carga del archivo")
+        print("Hubo un error con la carga de los archivos")
+
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
-    return lst
-
-    del lst[:]
-    print("Cargando archivo ....")
-    t1_start = process_time() #tiempo inicial
-
-    abierto1 = open(archivo1, 'r', encoding = 'utf8')
-    abierto2 = open(archivo2, 'r', encoding = 'utf8')
-    categorias = abierto1.readline().split(';')
-    categorias.extend(abierto2.readline().split(';'))
-    linea = abierto1.readline() + ';' + abierto2.readline()
-
-    while len(linea)>0: 
-        datos = linea.split(';')
-        dicc = {}
-        for i in range (len(categorias)-len(datos)):
-            datos.append(None)
-        for i in range(len(categorias)):
-            dicc[categorias[i]] = datos[i]
-        lst.append(dicc)
-        linea = abierto1.readline() + abierto2.readline()
-        
-        
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return (lst1,lst2) 
 
 def printMenu():
     """
@@ -154,25 +134,39 @@ def main():
     Args: None
     Return: None 
     """
-    lista = lt.newList()   # se require usar lista definida
+    lista1 = lt.newList()   # se require usar lista definida
+    lista2 = lt.newList() 
     while True:
         printMenu() #imprimir el menu de opciones en consola
         inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
-                lista = loadCSVFile("Data\SmallMoviesDetailsCleaned.csv","Data\MoviesCastingRaw-small.csv") #llamar funcion cargar datos
-                print("Datos cargados, ",lista['size']," elementos cargados")
+                datos = loadCSVFile("Data\AllMoviesDetailsCleaned.csv","Data\AllMoviesCastingRaw.csv") #llamar funcion cargar datos
+                lista1 = datos[0]
+                lista2 = datos[1]
+                print("Datos de detalles cargados, ",lista1['size']," elementos cargados")
+                print("Datos de casting cargados, ",lista2['size']," elementos cargados")
             elif int(inputs[0])==2: #opcion 2
-                if lista==None or lista['size']==0: #obtener la longitud de la lista
-                    print("La lista esta vacía")    
-                else: print("La lista tiene ",lista['size']," elementos")
+                if lista1==None or lista1['size']==0: #obtener la longitud de la lista
+                    print("La lista 1 está vacía")
+                elif lista2==None or lista2['size']==0: 
+                    print('La lista 2 está vacía')
+                else: 
+                    print("La lista de detalles tiene ",lista1['size']," elementos")
+                    print("La lista de casting tiene ",lista2['size']," elementos")
             elif int(inputs[0])==3: #opcion 3
-                if lista==None or lista['size']==0: #obtener la longitud de la lista
-                    print("La lista esta vacía")
-                else:   
+                if lista1==None or lista1['size']==0: #obtener la longitud de la lista
+                    print("La lista 1 esta vacía")
+                elif lista2==None or lista2['size']==0:
+                    print("La lista 2 esta vacía")
+                else:
+                    archivo = input('Ingrese el archivo de búsqueda (Detalles o Casting)')   
                     criteria =input('Ingrese el criterio de búsqueda\n')
                     column = input('Ingrese columna de búsqueda\n')
-                    counter=countElementsFilteredByColumn(criteria, column, lista) #filtrar una columna por criterio  
+                    if archivo.lower() == 'detalles':
+                        counter=countElementsFilteredByColumn(criteria, column, lista1) #filtrar una columna por criterio  
+                    elif archivo.lower() == 'casting':
+                        counter=countElementsFilteredByColumn(criteria, column, lista2)
                     print("Coinciden ",counter," elementos con el crtierio: ", criteria  )
             elif int(inputs[0])==4: #opcion 4
                 if lista==None or lista['size']==0: #obtener la longitud de la lista
