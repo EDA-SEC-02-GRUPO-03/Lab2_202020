@@ -160,14 +160,14 @@ def main():
                 elif lista2==None or lista2['size']==0:
                     print("La lista 2 esta vacía")
                 else:
-                    archivo = input('Ingrese el archivo de búsqueda (Detalles o Casting)')   
-                    criteria =input('Ingrese el criterio de búsqueda\n')
+                    archivo = input('Ingrese el archivo de búsqueda (Detalles o Casting)\n')   
                     column = input('Ingrese columna de búsqueda\n')
+                    criteria =input('Ingrese el criterio de búsqueda\n')
                     if archivo.lower() == 'detalles':
                         counter=countElementsFilteredByColumn(criteria, column, lista1) #filtrar una columna por criterio  
                     elif archivo.lower() == 'casting':
                         counter=countElementsFilteredByColumn(criteria, column, lista2)
-                    print("Coinciden ",counter," elementos con el crtierio: ", criteria  )
+                    print("Coinciden ",counter," elementos con el criterio: ", criteria  )
             elif int(inputs[0])==4: #opcion 4
                 if lista==None or lista['size']==0: #obtener la longitud de la lista
                     print("La lista esta vacía")
