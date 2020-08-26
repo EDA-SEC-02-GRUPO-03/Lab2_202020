@@ -51,10 +51,10 @@ def loadCSVFile (file1,file2, sep=";"):
         Borra la lista e informa al usuario
     Returns: None  
     """
-    #lst1 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
-    lst1 = lt.newList() #Usando implementacion linkedlist
-    #lst2 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
-    lst2 = lt.newList() #Usando implementacion linkedlist
+    lst1 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
+    #lst1 = lt.newList() #Usando implementacion linkedlist
+    lst2 = lt.newList("ARRAY_LIST") #Usando implementacion arraylist
+    #lst2 = lt.newList() #Usando implementacion linkedlist
     print("Cargando archivos ....")
     t1_start = process_time() #tiempo inicial
     dialect = csv.excel()
@@ -143,34 +143,32 @@ def req1(lst1, lst2, criteria1, column1, criteria2, column2):
     return counter
 
 def lessfunction(element1, element2, criteria):
-    if int(element1[criteria]) < int(element2[criteria]):
+    if float(element1[criteria]) < float(element2[criteria]):
         return True
     return False
 
 def greaterfunction(element1, element2, criteria):
-    if int(element1[criteria]) > int(element2[criteria]):
+    if float(element1[criteria]) > float(element2[criteria]):
         return True
     return False
 
-def req2 (lst, criteria, n, goodbad):
-    t1_start = process_time()
-    if goodbad == 1:
-        orden = sh.shellSort(lst, greaterfunction, criteria)
-        #orden = sel.selectionSort(lst, greaterfunction, criteria)
-        #orden = ins.insertionSort(lst, greaterfunction, criteria)
-    elif goodbad == 0:
-        orden = sh.shellSort(lst, lessfunction, criteria)
-        #orden = sel.selectionSort(lst, lessfunction, criteria)
-        #orden = ins.insertionSort(lst, lessfunction, criteria)
-    result = []
+def req2 (lst, function, criteria, n):
     
-    for i in range(n):
-        result.append(orden[i])
+    t1_start = process_time()
+    result = []
+    sh.shellSort(lst, function, criteria)
+    #sel.selectionSort(lst, function, criteria)       
+    #ins.insertionSort(lst,function,criteria)
+
+    for i in range(n+1):
+        result.append(lt.getElement(lst, i))
+        result[i] = (result[i]['title'],result[i][criteria])
+    del result[0]
     t1_stop = process_time()
     print('El tiempo fue de ', t1_stop-t1_start, ' segundos')
     return result
 
-
+der req3 ()
 def orderElementsByCriteria(function, column, lst, elements):
     """
     Retorna una lista con cierta cantidad de elementos ordenados por el criterio
@@ -235,8 +233,16 @@ def main():
                 n1 = int(input('¿Cuántas películas?\n'))
                 gb2 = int(input('Mejor Promedio (1) o Peor Promedio (0):\n'))
                 n2 = int(input('¿Cuántas películas?\n'))
-                resultados1 = req2(listaD,'vote_count', n1, gb1)
-                resultados2 = req2(listaD, 'vote_average', n2, gb2)
+                if gb1 == 1:
+                    function1 = greaterfunction
+                elif gb1 == 0:
+                    function1 = lessfunction
+                if gb2 == 1:
+                    function2 = greaterfunction
+                elif gb2 == 0: 
+                    function2 = lessfunction
+                resultados1 = req2(listaD, function1, 'vote_count', n1)
+                resultados2 = req2(listaD, function2, 'vote_average', n2)
                 print('Por votos:\n',resultados1 )
                 print('Por promedio:\n', resultados2)
             elif int(inputs[0])==0: #opcion 0, salir
