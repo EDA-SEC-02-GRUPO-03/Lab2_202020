@@ -97,8 +97,8 @@ def printMenu():
     print('------Requisitos del Reto------')
     print('4- Req. 1: Buenas películas de un director')
     print('5- Req. 2: Ranking de Películas')
-    print('8- Req. 5: Películas por género')
-    print('9- Req. 6: Ranking de películas por género')
+    print('6- Req. 5: Películas por género')
+    print('7- Req. 6: Ranking de películas por género')
     print("0- Salir")
 
 
