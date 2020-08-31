@@ -76,6 +76,16 @@ def loadCSVFile (file1,file2, sep=";"):
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return (lst1,lst2) 
 
+def lessfunction(element1, element2, criteria):
+    if float(element1[criteria]) < float(element2[criteria]):
+        return True
+    return False
+
+def greaterfunction(element1, element2, criteria):
+    if float(element1[criteria]) > float(element2[criteria]):
+        return True
+    return False
+
 def printMenu():
     """
     Imprime el menu de opciones
@@ -83,11 +93,12 @@ def printMenu():
     print("\nBienvenido")
     print("1- Cargar Datos")
     print("2- Contar los elementos de la Lista")
-    print("3- Contar elementos filtrados por palabra clave")
-    print("4- Consultar elementos a partir de dos listas")
-    print('5- Req. 1: Buenas películas de un director')
-    print('6- Req. 2: Ranking de Películas')
-    print('7- Req. 5: Películas por género')
+    print("3- Contar elementos filtrados por palabra clave\n")
+    print('------Requisitos del Reto------')
+    print('4- Req. 1: Buenas películas de un director')
+    print('5- Req. 2: Ranking de Películas')
+    print('8- Req. 5: Películas por género')
+    print('9- Req. 6: Ranking de películas por género')
     print("0- Salir")
 
 
@@ -120,6 +131,14 @@ def countElementsFilteredByColumn(criteria, column, lst):
         print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return counter
 
+#def orderElementsByCriteria(function, column, lst, elements):
+    """
+    Retorna una lista con cierta cantidad de elementos ordenados por el criterio
+    """
+    #return 0
+
+#---------------------------------RETO---------------------------------------------------
+
 def req1(lst1, lst2, criteria1, column1, criteria2, column2):
 
     if lst1['size'] == 0 or lst2['size'] == 0:
@@ -143,31 +162,33 @@ def req1(lst1, lst2, criteria1, column1, criteria2, column2):
     print('EL tiempo es de ', t1_stop-t1_start, ' segundos')
     return counter
 
-def lessfunction(element1, element2, criteria):
-    if float(element1[criteria]) < float(element2[criteria]):
-        return True
-    return False
-
-def greaterfunction(element1, element2, criteria):
-    if float(element1[criteria]) > float(element2[criteria]):
-        return True
-    return False
 
 def req2 (lst, function, criteria, n):
     
     t1_start = process_time()
-    result = []
+    result = lt.newList('ARRAY_LIST')
+    nombres = lt.newList('ARRAY_LIST')
+    votos = lt.newList('ARRAY_LIST')
     sh.shellSort(lst, function, criteria)
     #sel.selectionSort(lst, function, criteria)       
     #ins.insertionSort(lst,function,criteria)
 
     for i in range(n+1):
-        result.append(lt.getElement(lst, i))
-        result[i] = (result[i]['title'],result[i][criteria])
-    del result[0]
+        lt.addLast(result,lt.getElement(lst, i))    
+    iterator=it.newIterator(result)
+    while  it.hasNext(iterator):
+        element = it.next(iterator)
+        lt.addLast(nombres, element['title'])
+        lt.addLast(votos, element[criteria])
+    final = lt.newList('ARRAY_LIST')
+    for i in range(n+1):
+        lt.addLast(final, (lt.getElement(nombres, i),lt.getElement(votos,i)))
+    lt.addLast(final, lt.getElement(final, 0))
+    lt.removeFirst(final)
+    lt.removeFirst(final)
     t1_stop = process_time()
     print('El tiempo fue de ', t1_stop-t1_start, ' segundos')
-    return result
+    return final
 
 def req5(lst, criteria1, column1, column2, column3):
     if lst['size'] == 0:
@@ -175,28 +196,34 @@ def req5(lst, criteria1, column1, column2, column3):
     else:
         t1_start = process_time()
         iterator1 = it.newIterator(lst)
-        nombres = []
-        votos = []
+        nombres = lt.newList('ARRAY_LIST')
+        votos = lt.newList('ARRAY_LIST')
         counter = 0
         while  it.hasNext(iterator1):
             element = it.next(iterator1)
             if criteria1.lower() in element[column1].lower(): #filtrar por palabra clave 
-                nombres.append(element[column2])
-                votos.append(float(element[column3]))
+                lt.addLast(nombres, element[column2])
+                lt.addLast(votos, element[column3])
                 counter += 1
-        promedio = sum(votos)/len(votos)
+        suma = 0
+        for i in range(lt.size(votos)):
+            suma += float(lt.getElement(votos,i))
         t1_stop = process_time()
         tiempo = t1_stop-t1_start
-        return (nombres,counter,promedio,tiempo)
+        return nombres['elements'],counter,suma/lt.size(votos),tiempo
 
-def req6        
+def req6 (lst1, criteria1, column1, function, criteriaf, n):        
+    porgenero = lt.newList("ARRAY_LIST")
+    iterator = it.newIterator(lst1)
+    lt.addFirst(porgenero, '')
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        if criteria1.lower() in element[column1].lower():
+            lt.addLast(porgenero, element)
+    lt.removeFirst(porgenero)
+    listado = req2 (porgenero, function, criteriaf, n)
+    return listado
 
-def orderElementsByCriteria(function, column, lst, elements):
-    """
-    Retorna una lista con cierta cantidad de elementos ordenados por el criterio
-    """
-    
-    return 0
 
 def main():
     """
@@ -241,17 +268,10 @@ def main():
                         counter=countElementsFilteredByColumn(criteria, column, listaC)
                     print("Coinciden ",counter," elementos con el criterio: ", criteria  )
             elif int(inputs[0])==4: #opcion 4
-                if lista==None or lista['size']==0: #obtener la longitud de la lista
-                    print("La lista esta vacía")
-                else:
-                    criteria =input('Ingrese el criterio de búsqueda\n')
-                    counter=countElementsByCriteria(criteria,0,lista)
-                    print("Coinciden ",counter," elementos con el criterio: '", criteria ,"' (en construcción ...)")
-            elif int(inputs[0])==5: #opcion 5
                 director = input('Ingrese el nombre del director:\n')
                 pelis = req1(listaC, listaD, director, 'director_name', 6, 'vote_average')
                 print('El director ', director, ' tiene ', pelis, ' películas buenas.')
-            elif int(inputs[0])==6: #opcion 6
+            elif int(inputs[0])==5: #opcion 5
                 gb1 = int(input('Más Votos (1) o Menos Votos (0):\n'))
                 n1 = int(input('¿Cuántas películas?\n'))
                 gb2 = int(input('Mejor Promedio (1) o Peor Promedio (0):\n'))
@@ -268,13 +288,31 @@ def main():
                 resultados2 = req2(listaD, function2, 'vote_average', n2)
                 print('Por votos:\n',resultados1 )
                 print('Por promedio:\n', resultados2)
-            elif int(inputs[0])==7: #opcion 7
+            elif int(inputs[0])==8: #opcion 8
                 genero = input('Ingrese el género:\n')
                 resultado = req5(listaD, genero, 'genres', 'title', 'vote_average' )
                 print ('Las películas de ', genero, 'son:\n', resultado[0])
                 print ('Hay ', resultado[1], ' películas de ', genero)
                 print('El promedio de votación es de ', resultado[2])
                 print('El tiempo fue de ', resultado[3], ' segundos')
+            elif int(inputs[0])==9: #opcion 9
+                genero = input('Ingrese el género:\n')
+                gb1 = int(input('Más Votos (1) o Menos Votos (0):\n'))
+                n1 = int(input('¿Cuántas películas?\n'))
+                gb2 = int(input('Mejor Promedio (1) o Peor Promedio (0):\n'))
+                n2 = int(input('¿Cuántas películas?\n'))
+                if gb1 == 1:
+                    function1 = greaterfunction
+                elif gb1 == 0:
+                    function1 = lessfunction
+                if gb2 == 1:
+                    function2 = greaterfunction
+                elif gb2 == 0: 
+                    function2 = lessfunction
+                resultado1 = req6(listaD, genero, 'genres', function1, 'vote_count', n1)
+                resultado2 = req6(listaD, genero, 'genres', function2, 'vote_average', n2)
+                print('Por votos:\n',resultado1 )
+                print('Por promedio:\n', resultado2)
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
                 
